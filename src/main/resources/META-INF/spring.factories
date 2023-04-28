@@ -1,0 +1,4 @@
+org.springframework.boot.env.EnvironmentPostProcessor=\
+   com.allo.demo.secret.AwsSecretManagerEnvironmentPostProcessor
+org.springframework.context.ApplicationListener=\
+   com.allo.demo.secret.AwsSecretManagerEnvironmentPostProcessor

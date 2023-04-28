@@ -1,0 +1,32 @@
+# This CI workflow can be triggered by PR creation or code push in PR, or manual trigger (after maven release)
+# CI workflow for building, testing microservice, and publishing image to ECR
+name: Maven Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to run the workflow against'
+        type: environment
+        required: false
+
+  pull_request:
+    branches: [ main ]
+
+permissions:  # added using https://github.com/step-security/secure-workflows
+  contents: read
+
+jobs:
+
+  build-and-test:
+    permissions:
+      id-token: write # need this for OIDC
+      contents: read
+      packages: write
+    uses: ChrisDevOpsJourney/reusable-workflows/.github/workflows/maven-build.yaml@main
+    with:
+      env: ${{ github.event.inputs.environment }}
+      trufflehog-scan-flag: true
+      maven-params: "-B -Dmaven.test.skip=true -N"
+      context: "."
+    secrets: inherit
