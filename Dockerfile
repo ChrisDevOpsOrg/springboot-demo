@@ -1,5 +1,5 @@
 
-FROM adoptopenjdk/openjdk8:ubuntu-jre 
+FROM adoptopenjdk/openjdk8:ubuntu-jre
 
 ENV TZ=Asia/Singapore
 
