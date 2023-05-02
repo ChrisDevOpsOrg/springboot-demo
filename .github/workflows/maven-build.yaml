@@ -27,6 +27,6 @@ jobs:
     with:
       env: ${{ github.event.inputs.environment }}
       trufflehog-scan-flag: true
-      maven-params: "-B -Dmaven.test.skip=true -N"
+      maven-params: "-ntp -Dmaven.test.skip=true -N"
       context: "."
     secrets: inherit
