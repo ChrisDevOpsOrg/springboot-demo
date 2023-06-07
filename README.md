@@ -1,3 +1,4 @@
+---
 ## Database
 CREATE DATABASE your_database_name CHARACTER SET utf8 COLLATE utf8_general_ci;
 
@@ -16,3 +17,6 @@ ENGINE=InnoDB
 podman  build -t spring2-demo:latest -f Dockerfiler .
 
 podman run -d --name myapp -p8080:8080 spring2-demo:latest
+
+
+
