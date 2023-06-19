@@ -25,6 +25,6 @@ jobs:
         
     - name: access Dockerfile
       run: |
-        cat ../../Dockerfile
+        cat ../Dockerfile
   
   
