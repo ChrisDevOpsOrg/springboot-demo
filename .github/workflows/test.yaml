@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory:  main
+        working-directory:  src/main
     steps:
     - name: Checkout Source Code
       uses: actions/checkout@v3
