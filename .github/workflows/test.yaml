@@ -1,0 +1,30 @@
+# This CI workflow can be triggered by PR creation or code push in PR, or manual trigger (after maven release)
+# CI workflow for building, testing microservice, and publishing image to ECR
+name: Maven Build
+
+on:
+  workflow_dispatch:
+  
+permissions:  # added using https://github.com/step-security/secure-workflows
+  contents: read
+
+jobs:
+  test-working-dir:
+    name: test working dir
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory:  main
+    steps:
+    - name: Checkout Source Code
+      uses: actions/checkout@v3
+      
+    - name: print pwd
+      run: |
+        pwd
+        
+    - name: access Dockerfile
+      run: |
+        cat ../../Dockerfile
+  
+  
