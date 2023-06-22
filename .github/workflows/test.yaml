@@ -19,6 +19,10 @@ jobs:
     - name: Checkout Source Code
       uses: actions/checkout@v3
       
+    - name: print repo name
+      run: |
+        echo ${{ github.event.repository.name }}
+      
     - name: print pwd
       run: |
         pwd
