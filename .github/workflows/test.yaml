@@ -1,6 +1,6 @@
 # This CI workflow can be triggered by PR creation or code push in PR, or manual trigger (after maven release)
 # CI workflow for building, testing microservice, and publishing image to ECR
-name: Maven Build
+name: Test Build
 
 on:
   workflow_dispatch:
