@@ -11,7 +11,7 @@ permissions:  # added using https://github.com/step-security/secure-workflows
 jobs:
   test-working-dir:
     name: test working dir
-    runs-on: ubuntu-latest
+    runs-on: 76d143cac8b9
     defaults:
       run:
         working-directory:  src
