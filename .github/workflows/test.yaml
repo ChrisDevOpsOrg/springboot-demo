@@ -17,6 +17,10 @@ jobs:
         working-directory:  src
     steps:
     
+    - name: Checkout Source Code
+      uses: actions/checkout@v3
+      
+      
     - name: check path
       run: |
         if [[ -d /etc/chris ]]; then echo test_var1=true >>  $GITHUB_ENV; else echo test_var1=false >>  $GITHUB_ENV; fi
@@ -24,9 +28,6 @@ jobs:
     - name: debug
       run: |
         echo ${{ env.test_var1 }}
-    
-    - name: Checkout Source Code
-      uses: actions/checkout@v3
       
     - name: print repo name
       run: |
