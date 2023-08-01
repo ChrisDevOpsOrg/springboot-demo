@@ -28,6 +28,13 @@ jobs:
     - name: debug
       run: |
         echo ${{ env.test_var1 }}
+        
+    - name: Setup Maven Action
+      uses: s4u/setup-maven-action@v1.8.0
+      if: ${{ !env.test_var1 }}
+      with:
+        java-version: 17
+        maven-version: 3.8.7
       
     - name: print repo name
       run: |
