@@ -1,0 +1,42 @@
+name: Run Unit Test
+on:
+  workflow_dispatch:
+    
+permissions:
+  contents: read
+  id-token: write
+  pull-requests: write
+  security-events: write
+  actions: read  
+
+jobs:
+  build:
+    name: run-unit-test
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v3
+          
+      - name: Setup Maven Action
+        uses: s4u/setup-maven-action@v1.8.0
+        with:
+          java-version: 8
+          maven-version: 3.8.7
+          
+      - name: Build with Maven
+        run: |
+          mvn  clean verify -ntp -U -N -T 2C -P coverag
+
+
+      - name: Jacoco Report to PR
+        id: jacoco
+        uses: madrapps/jacoco-report@v1.6.1
+        with:
+          paths: ${{ github.workspace }}/target/site/jacoco/jacoco.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          min-coverage-overall: 30
+          min-coverage-changed-files: 60
+          title: Code Coverage
+          update-comment: true
