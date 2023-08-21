@@ -23,7 +23,7 @@ jobs:
       id-token: write # need this for OIDC
       contents: read
       packages: write
-    uses: ChrisDevOpsOrg/reusable-workflows/.github/workflows/maven-build.yaml@main
+    uses: ./.github/workflows/build-image.yaml
     with:
       env: ${{ github.event.inputs.environment }}
       trufflehog-scan-flag: true
