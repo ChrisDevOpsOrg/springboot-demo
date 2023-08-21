@@ -1,0 +1,223 @@
+# Build and Test workflow for Spring Boot microservices
+name: Maven Build
+on:
+  workflow_call:
+    inputs:
+      env:
+        required: true
+        type: string
+        default: "dev"
+
+      working-directory:
+        required: false
+        type: string
+        default: "."
+
+      java-version:
+        required: false
+        type: string
+        default: "8"
+
+      maven-params:
+        required: false
+        type: string
+        default: ""
+
+      trufflehog-scan-flag:
+        required: false
+        type: boolean
+        default: false
+
+      context:
+        description: Docker context (path) to start build from
+        # To set to a subdir, use format of "{{defaultContext}}:mysubdir"
+        required: false
+        type: string
+
+      ghcr-enable:
+        description: Push image to GitHub Container Registry
+        required: false
+        default: true
+        type: boolean
+
+      image-names:
+        description: A list of the image names(account/repo) to build and push
+        required: false
+        type: string
+        default: |
+          ghcr.io/${{ github.repository }}
+
+      platforms:
+        description: A list of platforms to build for
+        required: false
+        type: string
+        # common ones: linux/amd64,linux/arm64,linux/arm/v7
+        default: |
+          linux/amd64
+
+      push:
+        description: Push image to registry
+        required: false
+        default: true
+        type: boolean
+
+      tag-rules:
+        # https://github.com/marketplace/actions/docker-metadata-action#tags-input
+        description: Use docker-metadata action to create tags from a key-value pair list in CSV format
+        required: false
+        type: string
+        # this ruleset will create one or more tags for each image in image-names
+        # some fire in pr-only, some in push/merge-only
+        # I still recommend reusable `latest` tag for human-friendly testing (not servers)
+        # I like a full tag for prod images that reads something like `stable-<date>-<commit>`
+        # Tags starting with `gha-<run_id>` are unique to each PR commit, and used to test fresh images
+        # rules with is_default_branch only create the tag if it's a push/merge to default branch
+        # priority attribute is used to sort tags in the final list. The higher the value,
+        #   the higher the priority. The first tag in the list (higher priority) will be used as
+        #   the image version for generated OCI label and version output.
+        default: |
+          type=raw,value=stable-{{date 'YYYYMMDD'}}-{{sha}},enable={{is_default_branch}},priority=300
+          type=ref,event=tag,priority=200
+          type=raw,value=latest,enable={{is_default_branch}},priority=100
+          type=raw,value=gha-${{ github.run_id }},enable=${{github.event_name == 'pull_request'}},priority=200
+          type=ref,event=pr,priority=100
+
+      target:
+        description: Docker target to build
+        required: false
+        type: string
+
+    outputs:
+      ghcr-tag:
+        description: The tag of the image pushed to GitHub Container Registry
+        value: ${{ jobs.build-image.outputs.ghcr-tag }}
+
+permissions:
+  contents: read
+  packages: write # for push image to GHCR
+
+jobs:
+  maven-build:
+    name: build and test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory:  ${{ inputs.working-directory }}
+    # important to specify environment here, defaults to 'dev', so github ations knows where to retrieve the secrets
+    environment: ${{ inputs.env || 'dev' }}
+
+    # only run this job for auto trigger by PR merge, if manual trigger for other environments than dev,
+    # no need to run this job as the image will be pulled and promoted to envs higher than dev
+    # also dependabot PRs do not need to run this flow as GitHub prohibits dependabot PRs to access workflows
+    # dealing with secrets due to security reason.
+    if: (inputs.env == null || inputs.env == 'dev') && github.actor != 'dependabot[bot]'
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@v2
+        with:
+          egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
+
+      - name: Checkout Source Code
+        uses: actions/checkout@v3
+
+#      - name: Config AWS Credentials
+#        uses: aws-actions/configure-aws-credentials@v2
+#        with:
+#          role-to-assume: ${{ secrets.ROLE_TO_ASSUME }}
+#          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Setup Jdk
+        uses: actions/setup-java@v3
+        with:
+          java-version: ${{ inputs.java-version }}
+          distribution: 'adopt'
+          cache: maven
+
+      - name: Build with Maven
+        run: mvn clean install ${{ inputs.maven-params }} --file pom.xml
+
+      - name: Set project version as environment variable
+        run: echo "PROJECT_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_ENV
+
+      - name: Print debug info
+        run: |
+          echo environment is ${{ inputs.env }}
+          echo working_directory is ${{ inputs.working-directory }}
+          echo project version is ${{ env.PROJECT_VERSION }}
+          echo java-version is ${{ inputs.java-version }}
+
+#      - name: Build, tag, and push image to AWS ECR
+#        id: build-image
+#        env:
+#          AWS_REGION: ${{ secrets.AWS_REGION }}
+#          ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
+#          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY_NAME }}
+#          IMAGE_TAG: ${{ env.PROJECT_VERSION }}
+#        run: |
+#          # Build a docker container and push it to ECR so that it can be deployed to ECS.
+#          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+#          aws ecr get-login-password --region $AWS_REGION | docker login -u AWS --password-stdin $ECR_REGISTRY
+#          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+#          echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+      - name: TruffleHog Secrets Scan
+        if: inputs.trufflehog-scan-flag
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
+          extra_args: --debug --only-verified
+
+      # Build Docker Images
+        # we need qemu and buildx so we can build multiple platforms later
+      - name: Set up QEMU
+        id: qemu
+        uses: docker/setup-qemu-action@v2
+        # BuildKit (used with `docker buildx`) is the best way to build images
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to GitHub Container Registry
+        if: inputs.ghcr-enable == true
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+        # tmate session for debugging
+#      - name: Setup tmate session for debugging
+#        uses: mxschmitt/action-tmate@v3
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ inputs.image-names }}
+          tags: ${{ inputs.tag-rules }}
+          flavor-rules: ${{ inputs.flavor-rules }}
+      -
+        # this will build the images, once per platform,
+        # then push to one or more registries (based on image list above in docker_meta)
+        # NOTE: this will not push if a PR is from a fork, where secrets are not available
+        # https://securitylab.github.com/research/github-actions-preventing-pwn-requests/
+        name: Build and push
+        id: build_image
+        uses: docker/build-push-action@v4
+        with:
+          context: ${{ inputs.context }}
+          file: ${{ inputs.file }}
+          platforms: ${{ inputs.platforms }}
+          push: ${{ inputs.push }}
+          tags: ${{ steps.meta.outputs.tags }}
+          target: ${{ inputs.target }}
+          builder: ${{ steps.buildx.outputs.name }}
+          # it uses github cache API for faster builds:
+          # https://github.com/docker/build-push-action/blob/master/docs/advanced/cache.md#cache-backend-api
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          labels: ${{ steps.meta.outputs.labels }}
+          # provenance: ${{ steps.meta.outputs.provenance }}
+          provenance: true
+          sbom: true
