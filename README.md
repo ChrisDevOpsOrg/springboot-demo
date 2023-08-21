@@ -15,4 +15,4 @@ ENGINE=InnoDB
 ## Build Docker Image
 podman  build -t spring2-demo:latest -f Dockerfiler .
 
-podman run -d --name myapp -p8080:8080 spring2-demo:latest
+podman run -d --name myapp -p8080:8080 spring2-demo:latest 
