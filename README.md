@@ -1,4 +1,5 @@
 ## Database
+```sql
 CREATE DATABASE your_database_name CHARACTER SET utf8 COLLATE utf8_general_ci;
 
 CREATE TABLE `t_user` (
@@ -10,6 +11,7 @@ CREATE TABLE `t_user` (
 COLLATE='utf8_general_ci'
 ENGINE=InnoDB
 ;
+```
 
 ## Insert dummy data
 ```sql
@@ -31,3 +33,7 @@ INSERT INTO t_user (user_id, user_name, password, phone) VALUES (10, 'MichaelBro
 podman  build -t spring2-demo:latest -f Dockerfiler .
 
 podman run -d --name myapp -p8080:8080 spring2-demo:latest 
+
+
+## Access URL
+http://localhost:8080/demo/swagger-ui.html#/
