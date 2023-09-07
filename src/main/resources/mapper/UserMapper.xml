@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.allo.demo.dao.UserDao">
-  <sql id="BASE_TABLE">
+<!--   <sql id="BASE_TABLE">
        t_user
   </sql>
 
@@ -57,4 +57,4 @@
      FROM
     <include refid="BASE_TABLE"/>
   </select>
-</mapper>
+</mapper> -->
