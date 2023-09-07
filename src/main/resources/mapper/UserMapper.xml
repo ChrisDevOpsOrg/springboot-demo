@@ -32,7 +32,6 @@
      WHERE
      userId = #{userId, jdbcType=INTEGER}
   </delete>
- &lt;!&ndash; Update User &ndash;&gt;
   <update id="updateUser" parameterType="UserDomain">
      UPDATE
     <include refid="BASE_TABLE"/>
