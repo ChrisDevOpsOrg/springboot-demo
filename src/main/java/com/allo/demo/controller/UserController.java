@@ -33,6 +33,7 @@ public class UserController {
         userDomain.setUserName(userName);
         userDomain.setPassword(password);
         userDomain.setPhone(phone);
+         userDao.insert(userDomain);
         return ResponseEntity.ok("User Added");
     }
 
