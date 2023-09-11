@@ -1,6 +1,6 @@
 ## Database
 ```sql
-CREATE DATABASE your_database_name CHARACTER SET utf8 COLLATE utf8_general_ci;
+CREATE DATABASE demo CHARACTER SET utf8 COLLATE utf8_general_ci;
 
 CREATE TABLE t_user (
     userId INT AUTO_INCREMENT PRIMARY KEY,
