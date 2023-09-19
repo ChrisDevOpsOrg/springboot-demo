@@ -31,4 +31,4 @@ jobs:
     secrets: inherit
 
   build-step-summary:
-     uses: ./.github/workflows/build-setup-summary.yaml
+     uses: ./.github/workflows/build-step-summary.yaml
