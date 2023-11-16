@@ -78,7 +78,7 @@ on:
         default: |
           type=raw,value=stable-{{date 'YYYYMMDD'}}-{{sha}},enable={{is_default_branch}},priority=300
           type=ref,event=tag,priority=200
-          type=raw,value=latest,enable={{is_default_branch}},priority=100
+          # type=raw,value=latest,enable={{is_default_branch}},priority=100
           type=raw,value=gha-${{ github.run_id }},enable=${{github.event_name == 'pull_request'}},priority=200
           type=ref,event=pr,priority=100
 
