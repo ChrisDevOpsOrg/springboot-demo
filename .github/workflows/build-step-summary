@@ -1,0 +1,40 @@
+# Print maven build yaml params
+name: Print maven build params
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  maven-build-summary:
+    name: print maven build params
+    runs-on: ubuntu-latest
+    steps:
+      - name: print maven params
+        run: |
+          echo '# Build Params' >> $GITHUB_STEP_SUMMARY
+          echo '<table>' >> $GITHUB_STEP_SUMMARY
+
+          echo '<tr>' >> $GITHUB_STEP_SUMMARY
+          echo '<td>:bust_in_silhouette: Triggered By</td>' >> $GITHUB_STEP_SUMMARY
+          echo '<td>${{ github.triggering_actor }}</td>' >> $GITHUB_STEP_SUMMARY
+          echo '</tr>' >> $GITHUB_STEP_SUMMARY
+
+          echo '<tr>' >> $GITHUB_STEP_SUMMARY
+          echo '<td>:package: Branch</td>' >> $GITHUB_STEP_SUMMARY
+          echo '<td>${{ steps.get-branch-name.outputs.branch }}</td>' >> $GITHUB_STEP_SUMMARY
+          echo '</tr>' >> $GITHUB_STEP_SUMMARY
+
+          echo '<tr>' >> $GITHUB_STEP_SUMMARY
+          echo '<td>:hammer: Java Version</td>' >> $GITHUB_STEP_SUMMARY
+          echo '<td>${GITHUB_REF#refs/heads/}</td>' >> $GITHUB_STEP_SUMMARY
+          echo '</tr>' >> $GITHUB_STEP_SUMMARY
+
+          echo '<tr>' >> $GITHUB_STEP_SUMMARY
+          echo '<td>:label: Image Tag</td>' >> $GITHUB_STEP_SUMMARY
+          echo '<td>${{ inputs.image-tag }}</td>' >> $GITHUB_STEP_SUMMARY
+          echo '</tr>' >> $GITHUB_STEP_SUMMARY
+
+          echo '</table>' >> $GITHUB_STEP_SUMMARY

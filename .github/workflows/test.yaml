@@ -36,9 +36,10 @@ jobs:
         java-version: 17
         maven-version: 3.8.7
       
-    - name: print repo name
+    - name: Print Repo Info
       run: |
         echo ${{ github.event.repository.name }}
+        echo ${{ github.repository_owner }}
       
     - name: print pwd
       run: |

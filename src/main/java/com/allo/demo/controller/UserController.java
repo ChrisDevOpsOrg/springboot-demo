@@ -33,6 +33,7 @@ public class UserController {
         userDomain.setUserName(userName);
         userDomain.setPassword(password);
         userDomain.setPhone(phone);
+        userDao.insert(userDomain);
         return ResponseEntity.ok("User Added");
     }
 
@@ -65,7 +66,7 @@ public class UserController {
     @GetMapping("get")
     @ApiOperation(value = "Get User List", notes = "Get User List")
     public ResponseEntity getUsers() {
-        List<UserDomain> userDomains = userDao.selectList(null);
+        List<UserDomain> userDomains = userDao.selectUsers();
         Gson gson = new Gson();
         String s = gson.toJson(userDomains);
         System.out.println(s);
