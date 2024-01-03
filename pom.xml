@@ -117,17 +117,6 @@
 
 	</dependencies>
 
-	<distributionManagement>
-		<repository>
-			<id>olea-release</id>
-			<url>http://nexus.llsolea.com/repository/maven-release</url>
-		</repository>
-		<snapshotRepository>
-			<id>olea-snapshots</id>
-			<url>http://nexus.llsolea.com/repository/maven-snapshots</url>
-		</snapshotRepository>
-	</distributionManagement>
-
 	<build>
 		<plugins>
 			<plugin>
